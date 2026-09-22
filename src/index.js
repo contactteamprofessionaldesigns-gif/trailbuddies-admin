@@ -7,7 +7,7 @@ import reportWebVitals from './reportWebVitals';
 import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
 
-// Configure Amplify with static strings to avoid build-time injection issues
+// Configure Amplify with precise v6 production configurations
 Amplify.configure({
   Auth: {
     Cognito: {
@@ -20,7 +20,7 @@ Amplify.configure({
     GraphQL: {
       endpoint: 'https://amazonaws.com',
       region: 'ap-south-1',
-      defaultAuthMode: 'amazonCognitoUserPool'
+      defaultAuthMode: 'userPool'
     }
   }
 });
