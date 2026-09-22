@@ -1,15 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { generateClient } from 'aws-amplify/api';
+import { Authenticator } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
 
-// Initialize the pure GraphQL client for Amplify v6
+// Initialize the clean GraphQL client for Amplify v6
 const client = generateClient();
 
-export default function App() {
+function App({ signOut, user }) {
   const [treks, setTreks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({ title: '', category: 'Forts', difficulty: 'Easy' });
 
-  // 1. Fetch data on load safely
+  // 1. Fetch data from DynamoDB safely on load
   async function fetchTreks() {
     try {
       setLoading(true);
@@ -27,7 +29,7 @@ export default function App() {
       const response = await client.graphql({ query });
       setTreks(response.data.listTreks || []);
     } catch (err) {
-      console.error('Error fetching treks:', err);
+      console.error('Error fetching treks from AWS:', err);
     } finally {
       setLoading(false);
     }
@@ -37,7 +39,7 @@ export default function App() {
     fetchTreks();
   }, []);
 
-  // 2. Clear String Mutation Add Logic
+  // 2. Add Trek Logic with string validations
   const handleAddTrek = async (e) => {
     e.preventDefault();
     if (!formData.title) return alert('Trek Title is compulsory!');
@@ -70,11 +72,12 @@ export default function App() {
       setFormData({ title: '', category: 'Forts', difficulty: 'Easy' });
       await fetchTreks();
     } catch (err) {
-      console.error('Error saving to DynamoDB:', err);
+      console.error('Error saving trek to DynamoDB:', err);
+      alert('Database error. Check your AppSync settings.');
     }
   };
 
-  // 3. Delete Mutation Logic with proper Input Wrapper
+  // 3. Delete Trek Logic wrapped inside Input Object
   const handleDeleteTrek = async (id) => {
     if (!window.confirm('Delete this trek permanently from AWS DynamoDB?')) return;
     try {
@@ -88,13 +91,17 @@ export default function App() {
       await client.graphql({ query: mutation, variables: { input: { id: String(id) } } });
       await fetchTreks();
     } catch (err) {
-      console.error('Error deleting from DynamoDB:', err);
+      console.error('Error deleting trek from DynamoDB:', err);
     }
   };
 
   return (
     <div style={{ padding: '20px', fontFamily: 'sans-serif' }}>
-      <h1 style={{ color: '#ff9900' }}>⛰️ TrailBuddies Admin Dashboard (AWS Secure Layer)</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1 style={{ color: '#ff9900' }}>⛰️ TrailBuddies Admin Dashboard (AWS Secure Layer)</h1>
+        <button onClick={signOut} style={{ padding: '8px 15px', background: '#333', color: 'white', border: 'none', cursor: 'pointer', borderRadius: '4px' }}>Sign Out</button>
+      </div>
+      <p>Welcome, <strong>{user?.username}</strong>! You have access to secure admin tools.</p>
       <hr />
       
       {/* Trek Insertion Form */}
@@ -152,5 +159,14 @@ export default function App() {
         </table>
       )}
     </div>
+  );
+}
+
+// Clean Export App wrapped with Authenticator to resolve React Error #130
+export default function AppWithAuth() {
+  return (
+    <Authenticator>
+      {({ signOut, user }) => <App signOut={signOut} user={user} />}
+    </Authenticator>
   );
 }
