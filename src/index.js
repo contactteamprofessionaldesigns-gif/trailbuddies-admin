@@ -4,10 +4,9 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { Amplify } from 'aws-amplify';
-import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 
-// Absolute clean production v6 config structure without object grouping error
+// Absolute clean configuration structure for AWS Amplify v6
 Amplify.configure({
   Auth: {
     Cognito: {
@@ -28,9 +27,7 @@ Amplify.configure({
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <Authenticator>
-      {({ signOut, user }) => <App signOut={signOut} user={user} />}
-    </Authenticator>
+    <App />
   </React.StrictMode>
 );
 
