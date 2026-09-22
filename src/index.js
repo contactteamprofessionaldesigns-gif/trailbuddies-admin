@@ -7,20 +7,20 @@ import reportWebVitals from './reportWebVitals';
 import { Amplify } from 'aws-amplify';
 import { Authenticator } from '@aws-amplify/ui-react';
 
-// Configure Amplify
+// Configure Amplify with static strings to avoid build-time injection issues
 Amplify.configure({
   Auth: {
     Cognito: {
-      userPoolId: process.env.REACT_APP_USER_POOL_ID,
-      userPoolClientId: process.env.REACT_APP_USER_POOL_CLIENT_ID,
-      identityPoolId: process.env.REACT_APP_IDENTITY_POOL_ID,
+      userPoolId: 'ap-south-1_f5W7ko2yG',
+      userPoolClientId: '72ise1snosrj9f8tefr0ntrmcb',
+      identityPoolId: 'ap-south-1:4007676d-177d-4941-93ce-3a6e68098395'
     }
   },
   API: {
     GraphQL: {
-      endpoint: process.env.REACT_APP_API_ENDPOINT || 'https://your-api-endpoint.amazonaws.com/graphql',
-      region: process.env.REACT_APP_AWS_REGION || 'ap-south-1',
-      defaultAuthMode: 'userPool'
+      endpoint: 'https://amazonaws.com',
+      region: 'ap-south-1',
+      defaultAuthMode: 'amazonCognitoUserPool'
     }
   }
 });
