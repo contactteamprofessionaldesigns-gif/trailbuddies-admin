@@ -6,7 +6,6 @@ import reportWebVitals from './reportWebVitals';
 import { Amplify } from 'aws-amplify';
 import '@aws-amplify/ui-react/styles.css';
 
-// Absolute clean configuration structure for AWS Amplify v6
 Amplify.configure({
   Auth: {
     Cognito: {
