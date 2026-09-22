@@ -1,4 +1,27 @@
-const handleAddTrek = async (e) => {
+import { useState, useRef, useEffect } from 'react';
+import imageCompression from 'browser-image-compression';
+import { indianStatesDistricts } from './indian-states-districts';
+import * as turf from '@turf/turf';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { MapContainer, TileLayer, Polyline, useMap } from 'react-leaflet';
+import { Authenticator } from '@aws-amplify/ui-react';
+import { generateClient } from 'aws-amplify/api';
+
+// Initialize GraphQL client at top level for Amplify v6
+const client = generateClient();
+
+// ChangeView component for programmatic map updates
+function ChangeView({ center, zoom }) {
+  const map = useMap();
+  if (center && center.length === 2) {
+    map.setView(center, zoom);
+  }
+  return null;
+}
+
+function App({ signOut, user }) {
+  console.log('App component rendering');
+  const handleAddTrek = async (e) => {
   e.preventDefault();
   
   // Strict validation
@@ -97,3 +120,29 @@ const handleAddTrek = async (e) => {
     alert(`Error creating trek: ${error.message || 'Unknown error'}. Check console for details.`);
   }
 };
+  const handleDeleteTrek = async (id) => {
+  if (window.confirm('Are you sure you want to delete this trek? This action cannot be undone.')) {
+    try {
+      const mutation = `
+        mutation DeleteTrek($id: ID!) {
+          deleteTrek(id: $id) {
+            id
+          }
+        }
+      `;
+      await client.graphql({ query: mutation, variables: { id } });
+      await fetchTreks(); // Refresh treks from database
+    } catch (error) {
+      console.error('Error deleting trek:', error);
+      alert('Error deleting trek. Please try again.');
+    }
+  }
+};
+  // Export App wrapped with Authenticator
+export default function AppWithAuth() {
+  return (
+    <Authenticator>
+      {({ signOut, user }) => <App signOut={signOut} user={user} />}
+    </Authenticator>
+  );
+}
