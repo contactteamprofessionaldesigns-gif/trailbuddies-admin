@@ -132,25 +132,27 @@ function App({ signOut, user }) {
     alert(`Error creating trek: ${error.message || 'Unknown error'}. Check console for details.`);
   }
 };
-  const handleDeleteTrek = async (id) => {
+const handleDeleteTrek = async (id) => {
   if (window.confirm('Are you sure you want to delete this trek? This action cannot be undone.')) {
     try {
       const mutation = `
-        mutation DeleteTrek($id: ID!) {
-          deleteTrek(id: $id) {
+        mutation DeleteTrek($input: DeleteTrekInput!) {
+          deleteTrek(input: $input) {
             id
           }
         }
       `;
-      await client.graphql({ query: mutation, variables: { id } });
-      await fetchTreks(); // Refresh treks from database
+      // Properly passing variables wrapped inside an input object for AppSync compliance
+      await client.graphql({ query: mutation, variables: { input: { id: id } } });
+      await fetchTreks(); // Refresh treks from database permanently
     } catch (error) {
-      console.error('Error deleting trek:', error);
-      alert('Error deleting trek. Please try again.');
+      console.error('Error deleting trek from backend:', error);
+      alert('Error deleting trek. Please check your AppSync permissions.');
     }
   }
 };
   // Export App wrapped with Authenticator
+// Export App wrapped cleanly with the Authenticator component at the base layer
 export default function AppWithAuth() {
   return (
     <Authenticator>
