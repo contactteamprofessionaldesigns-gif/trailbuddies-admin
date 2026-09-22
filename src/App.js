@@ -21,14 +21,26 @@ function ChangeView({ center, zoom }) {
 
 function App({ signOut, user }) {
   console.log('App component rendering');
-  const handleAddTrek = async (e) => {
-  e.preventDefault();
-  
-  // Strict validation
-  if (!validateForm()) {
-    alert('Please fill in all mandatory fields before adding a trek.');
-    return;
+  const handleDeleteTrek = async (id) => {
+  if (window.confirm('Are you sure you want to delete this trek? This action cannot be undone.')) {
+    try {
+      const mutation = `
+        mutation DeleteTrek($input: DeleteTrekInput!) {
+          deleteTrek(input: $input) {
+            id
+          }
+        }
+      `;
+      // Properly passing variables wrapped inside an input object for AppSync compliance
+      await client.graphql({ query: mutation, variables: { input: { id: id } } });
+      await fetchTreks(); // Refresh treks from database permanently
+    } catch (error) {
+      console.error('Error deleting trek from backend:', error);
+      alert('Error deleting trek. Please check your AppSync permissions.');
+    }
   }
+};
+
 
   // Generate auto-incrementing custom ID based on existing treks
   const maxCustomId = treks.reduce((max, trek) => {
